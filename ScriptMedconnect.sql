@@ -40,7 +40,7 @@ nome varchar(45) not null
 create table RoboCirurgiao(
 idRobo int primary key auto_increment,
 modelo varchar(45) not null,
-fabricacao DATE not null,
+fabricacao varchar(45) not null,
 fkStatus int, constraint fkStatus foreign key (fkStatus) references statusRobo(idStatus)
 );
 
