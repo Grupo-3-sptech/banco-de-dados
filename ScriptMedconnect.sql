@@ -81,6 +81,20 @@ dataHorario DATETIME not null,
 fkCategoria int, constraint fkCategoria foreign key (fkCategoria) references categoriaCirurgia(idCategoria)
 );
 
+create table Metrica(
+idMetrica INT PRIMARY KEY auto_increment,
+alerta DOUBLE,
+urgente DOUBLE,
+critico DOUBLE,
+tipo_dado VARCHAR(50)
+);
+
+INSERT INTO metrica (alerta, urgente, critico, tipo_dado) VALUES
+(0.60, 0.70, 0.80, "Porcentagem de Uso"),
+(0.901, 0.93, 0.95, "Porcentagem de Uso"),
+(0.70, 0.80, 0.90, "Porcentagem de Uso");
+
+
 create table categoriaComponente(
 idCategoriaComponente int primary key auto_increment,
 nome varchar(45) not null
@@ -91,7 +105,9 @@ idComponentes int primary key auto_increment,
 nome varchar(45) not null,
 unidade varchar(10),
 descricaoAdd varchar(45),
-fkCategoriaComponente int, constraint fkCategoriaComponente foreign key (fkCategoriaComponente) references categoriaComponente(idCategoriaComponente)
+fkCategoriaComponente int, constraint fkCategoriaComponente foreign key (fkCategoriaComponente) references categoriaComponente(idCategoriaComponente),
+fkMetrica INT, 
+constraint frkMetrica foreign key (fkMetrica) references Metrica(idMetrica)
 );
 
 INSERT INTO categoriaComponente VALUES
@@ -101,17 +117,17 @@ INSERT INTO categoriaComponente VALUES
 (4, "Rede");
 
 
-INSERT INTO componentes (nome, unidade, fkCategoriaComponente) 
-VALUES ('Porcentagem da CPU', "%", 1);
+INSERT INTO componentes (nome, unidade, fkCategoriaComponente, fkMetrica) 
+VALUES ('Porcentagem da CPU', "%", 1, 1);
 
 -- Inserir Memória RAM
-INSERT INTO componentes (nome, unidade, fkCategoriaComponente) 
-VALUES ('Porcentagem da Memoria', '%', 2);
+INSERT INTO componentes (nome, unidade, fkCategoriaComponente, fkMetrica) 
+VALUES ('Porcentagem da Memoria', '%', 2, 2);
 TRUNCATE TABLE componentes;
 
 -- Inserir Disco
-INSERT INTO componentes (nome, unidade, fkCategoriaComponente) 
-VALUES ('Porcentagem do Disco', '%', 3);
+INSERT INTO componentes (nome, unidade, fkCategoriaComponente, fkMetrica) 
+VALUES ('Porcentagem do Disco', '%', 3, 3);
 
 -- Inserir Rede
 INSERT INTO componentes (nome, descricaoAdd, fkCategoriaComponente) 
@@ -127,6 +143,61 @@ dado Double not null,
 fkComponente int, 
 constraint fkComponente foreign key (fkComponente) references componentes(idComponentes)
 );
+
+create table Alerta(
+idAlerta INT PRIMARY KEY auto_increment,
+tipo_alerta VARCHAR(15),
+fkRegistro INT,
+constraint frkRegistro foreign key (fkRegistro) references Registros(idRegistro),
+fkRobo INT,
+constraint frkRobo foreign key (fkRobo) references Registros(fkRoboRegistro)
+);
+
+INSERT INTO Registros VALUES 
+(null, 1, now(), 0.98, 1),
+(null, 1, now(), 0.6, 1),
+(null, 1, now(), 0.7, 1);
+
+SELECT * FROM RoboCirurgiao;
+SELECT * FROM Alerta;
+SELECT * FROM Metrica;
+TRUNCATE TABLE Alerta;
+
+DROP TRIGGER criarAlerta;
+DELIMITER //
+CREATE TRIGGER criarAlerta
+AFTER INSERT ON Registros
+FOR EACH ROW 
+BEGIN
+DECLARE id_metrica INT;
+    DECLARE v_alerta DOUBLE;
+    DECLARE v_urgente DOUBLE;
+    DECLARE v_critico DOUBLE;
+    
+    SELECT fkMetrica FROM componentes 
+    WHERE NEW.fkComponente = idComponentes
+    INTO id_metrica;
+    
+    
+    SELECT alerta, urgente, critico
+    INTO v_alerta, v_urgente, v_critico
+    FROM Metrica
+    WHERE idMetrica = id_metrica;
+    
+     IF NEW.dado >= v_critico THEN
+        INSERT INTO Alerta (tipo_alerta, fkRegistro, fkRobo)
+        VALUES ("critico", NEW.idRegistro, NEW.fkRoboRegistro);
+     ELSEIF NEW.dado >= v_urgente THEN
+        INSERT INTO Alerta (tipo_alerta, fkRegistro, fkRobo)
+        VALUES ("urgente", NEW.idRegistro, NEW.fkRoboRegistro);
+	 ELSEIF NEW.dado >= v_alerta THEN
+        INSERT INTO Alerta (tipo_alerta, fkRegistro, fkRobo)
+        VALUES ("alerta", NEW.idRegistro, NEW.fkRoboRegistro);
+     END IF;
+	   
+END;
+//
+DELIMITER ;
 
 
 INSERT INTO Hospital (nomeFantasia, CNPJ, razaoSocial, sigla, responsavelLegal, fkHospitalSede) 
@@ -163,6 +234,7 @@ VALUES ('Ativo');
 INSERT INTO RoboCirurgiao (modelo, fabricacao, fkStatus, fkHospital, idProcess) 
 VALUES ('Modelo A', '2023-09-12', 1,1, "B2532B6");
 
+select * from RoboCirurgiao;
 INSERT INTO SalaCirurgiao (numero, fkHospitalSala, fkRoboSala) 
 VALUES ('101', 1, 1);
 
@@ -172,7 +244,6 @@ VALUES ('Alto');
 INSERT INTO cirurgia (idCirurgia, fkRoboCirurgia, dataHorario, fkCategoria) 
 VALUES (1, 1, '2023-09-15 14:00:00', 1);
 
-select*from registros;
 INSERT INTO registros VALUES (NULL, 1, "2024-10-15 21:00:02", 10, 1);
 INSERT INTO registros VALUES (NULL, 1, "2024-10-15 21:00:02", 20, 1);
 
