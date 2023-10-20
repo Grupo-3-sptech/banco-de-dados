@@ -147,8 +147,8 @@ INSERT INTO statusRobo (nome)
 VALUES ('Ativo');
 
 
-INSERT INTO RoboCirurgiao (modelo, fabricacao, fkStatus, fkHospital) 
-VALUES ('Modelo A', '2023-09-12', 1);
+INSERT INTO RoboCirurgiao (modelo, fabricacao, fkStatus, fkHospital, idProcess) 
+VALUES ('Modelo A', '2023-09-12', 1, "B2532B6");
 
 INSERT INTO SalaCirurgiao (numero, fkHospitalSala, fkRoboSala) 
 VALUES ('101', 1, 1);
@@ -300,6 +300,8 @@ GROUP BY DATE_FORMAT(HorarioDado, '%m/%Y'), nomeComponente
 LIMIT 36;
 
 INSERT INTO Registros VALUES(NULL, 1, "2023-11-21 21:56:02", 20.5, 1);
+
+SELECT * FROM componentes;
 
 
 
