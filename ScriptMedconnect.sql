@@ -32,6 +32,8 @@ constraint pkCompostaFuncionariosHospital primary key(idFuncionarios, fkHospital
 fkEscalonamento int, constraint fkEscalonamento foreign key (fkEscalonamento) references EscalonamentoFuncionario(idEscalonamento)
 );
 
+SELECT * FROM funcionarios;
+
 create table statusRobo(
 idStatus int primary key auto_increment,
 nome varchar(45) not null
@@ -40,9 +42,14 @@ nome varchar(45) not null
 create table RoboCirurgiao(
 idRobo int primary key auto_increment,
 modelo varchar(45) not null,
-fabricacao varchar(45) not null,
-fkStatus int, constraint fkStatus foreign key (fkStatus) references statusRobo(idStatus)
+fabricacao VARCHAR(45) not null,
+idProcess VARCHAR(45),
+fkStatus int, constraint fkStatus foreign key (fkStatus) references statusRobo(idStatus),
+fkHospital INT, 
+constraint fkHospitalRobo foreign key (fkHospital) references Hospital(idHospital)
 );
+
+SELECT * FROM Funcionarios;
 
 CREATE TABLE associado (
 idAssociado INT PRIMARY KEY auto_increment,
@@ -66,6 +73,7 @@ idCategoria int primary key auto_increment,
 niveisPericuloridade varchar(45) not null
 );
 
+
 create table cirurgia (
 idCirurgia int not null,
 fkRoboCirurgia int, constraint fkRoboCirurgia foreign key (fkRoboCirurgia) references RoboCirurgiao(idRobo),
@@ -73,28 +81,41 @@ dataHorario DATETIME not null,
 fkCategoria int, constraint fkCategoria foreign key (fkCategoria) references categoriaCirurgia(idCategoria)
 );
 
+create table categoriaComponente(
+idCategoriaComponente int primary key auto_increment,
+nome varchar(45) not null
+);
+
 create table componentes(
 idComponentes int primary key auto_increment,
 nome varchar(45) not null,
-modelo varchar(45) not null,
-identificacaoComponente varchar(60) not null,
-descricaoAdd varchar(45)
+unidade varchar(10),
+descricaoAdd varchar(45),
+fkCategoriaComponente int, constraint fkCategoriaComponente foreign key (fkCategoriaComponente) references categoriaComponente(idCategoriaComponente)
 );
 
-INSERT INTO componentes (nome, modelo, identificacaoComponente) 
-VALUES ('CPU', 'Modelo da CPU', 'ID da CPU');
+INSERT INTO categoriaComponente VALUES
+(1, "CPU"),
+(2, "Memória RAM"),
+(3, "Disco"),
+(4, "Rede");
+
+
+INSERT INTO componentes (nome, unidade, fkCategoriaComponente) 
+VALUES ('Porcentagem da CPU', "%", 1);
 
 -- Inserir Memória RAM
-INSERT INTO componentes (nome, modelo, identificacaoComponente) 
-VALUES ('Memória RAM', 'Modelo da RAM', 'ID da RAM');
+INSERT INTO componentes (nome, unidade, fkCategoriaComponente) 
+VALUES ('Porcentagem da Memoria', '%', 2);
+TRUNCATE TABLE componentes;
 
 -- Inserir Disco
-INSERT INTO componentes (nome, modelo, identificacaoComponente) 
-VALUES ('Disco', 'Modelo do Disco', 'ID do Disco');
+INSERT INTO componentes (nome, unidade, fkCategoriaComponente) 
+VALUES ('Porcentagem do Disco', '%', 3);
 
 -- Inserir Rede
-INSERT INTO componentes (nome, modelo, identificacaoComponente) 
-VALUES ('Rede', 'Modelo da Rede', 'ID da Rede');
+INSERT INTO componentes (nome, descricaoAdd, fkCategoriaComponente) 
+VALUES ('Rede', 'Conexao da Rede', 4);
 
 create table Registros (
 idRegistro int auto_increment,
@@ -126,43 +147,34 @@ VALUES ('Admin', 3);
 SELECT * FROM escalonamentoFuncionario;
 
 INSERT INTO Funcionarios (nome, email, CPF, telefone, senha, fkHospital, fkEscalonamento) 
-VALUES ('Kayky', 'kayky@abc.com', '123.456.789-01', '987654321', '123456', 1, 1);
-
-INSERT INTO Funcionarios (nome, email, CPF, telefone, senha, fkHospital, fkEscalonamento) 
-VALUES ('Danilo', 'daniloo@email.com', '125.456.789-01', '987654321', '123456', 1, 2);
-
-INSERT INTO Funcionarios (nome, email, CPF, telefone, senha, fkHospital, fkEscalonamento) 
-VALUES ('Maria Souza', 'maria@example.com', '123.456.789-01', '987654321', 'senha123', 1, 3);
-
-INSERT INTO associado VALUES (null, "erick@email.com", 1, 1);
+VALUES ('Kayky', 'kayky@abc.com', '12345678901', '987654321', '123456', 1, 1),
+('Gabriel', 'gabriel@email.com', '12345678901', '987654321', '123456', 1, 2),
+('Maria Souza', 'maria@example.com', '12345678901', '987654321', 'senha123', 1, 3);
 
 SELECT * FROM Funcionarios;
-SELECT * FROM associado;a
+SELECT * FROM associado;
 
-SELECT * FROM Funcionarios f 
-JOIN EscalonamentoFuncionario e ON f.fkEscalonamento = e.idEscalonamento
-WHERE f.email = 'erick@email.com' AND f.senha = '123456';
+INSERT INTO associado VALUES (null, "erick@email.com", 1, 1);
 
 INSERT INTO statusRobo (nome) 
 VALUES ('Ativo');
 
 
-INSERT INTO RoboCirurgiao (modelo, fabricacao, fkStatus) 
-VALUES ('Modelo A', '2023-09-12', 1);
-
+INSERT INTO RoboCirurgiao (modelo, fabricacao, fkStatus, fkHospital, idProcess) 
+VALUES ('Modelo A', '2023-09-12', 1,1, "B2532B6");
 
 INSERT INTO SalaCirurgiao (numero, fkHospitalSala, fkRoboSala) 
 VALUES ('101', 1, 1);
 
-
 INSERT INTO categoriaCirurgia (niveisPericuloridade) 
 VALUES ('Alto');
-
 
 INSERT INTO cirurgia (idCirurgia, fkRoboCirurgia, dataHorario, fkCategoria) 
 VALUES (1, 1, '2023-09-15 14:00:00', 1);
 
 select*from registros;
+INSERT INTO registros VALUES (NULL, 1, "2024-10-15 21:00:02", 10, 1);
+INSERT INTO registros VALUES (NULL, 1, "2024-10-15 21:00:02", 20, 1);
 
 SELECT r.*
 FROM Registros r
@@ -172,12 +184,14 @@ WHERE c.nome = 'Rede';
 SELECT r.*
 FROM Registros r
 JOIN componentes c ON r.fkComponente = c.idComponentes
-WHERE c.nome = 'cpu';
+JOIN categoriacomponente t on c.fkCategoriaComponente = t.idCategoriaComponente
+WHERE t.idCategoriaComponente = 1;
 
 SELECT r.*
         FROM Registros r
         JOIN componentes c ON r.fkComponente = c.idComponentes
-        WHERE c.nome = 'cpu'
+        JOIN categoriacomponente t on c.fkCategoriaComponente = t.idCategoriaComponente
+        WHERE t.idCategoriaComponente = 1
         AND r.fkRoboRegistro = 1
                     order by r.idRegistro desc limit 7;
 
@@ -186,14 +200,128 @@ TRUNCATE TABLE Registros;
 SELECT r.*
 FROM Registros r
 JOIN componentes c ON r.fkComponente = c.idComponentes
-WHERE c.nome = 'memoria RAM';
+ JOIN categoriacomponente t on c.fkCategoriaComponente = t.idCategoriaComponente
+        WHERE t.idCategoriaComponente = 2;
 
 
 SELECT r.*
 FROM Registros r
 JOIN componentes c ON r.fkComponente = c.idComponentes
-WHERE c.nome = 'disco';
+ JOIN categoriacomponente t on c.fkCategoriaComponente = t.idCategoriaComponente
+        WHERE t.idCategoriaComponente = 3;
+
+SELECT r.*
+FROM Registros r
+JOIN componentes c ON r.fkComponente = c.idComponentes;
 
 SELECT r.idRegistro, r.HorarioDado, r.dado, c.nome
 FROM Registros r
-JOIN componentes c ON r.fkComponente = c.idComponentes;
+JOIN componentes c ON r.fkComponente = c.idComponentes
+ JOIN categoriacomponente t on c.fkCategoriaComponente = t.idCategoriaComponente;
+
+SELECT r.idRegistro, r.HorarioDado, r.dado, c.nome
+FROM Registros r
+JOIN componentes c ON r.fkComponente = c.idComponentes
+LIMIT 7;
+
+-- SELECT COM TABELA TEMPORÁRIA PARA PEGAR OS ÚLTIMOS 7 REGISTROS DE CADA COMPONENTE
+
+WITH LinhasComponentes AS (
+  SELECT
+    r.idRegistro,
+    DATE_FORMAT(r.HorarioDado, '%d/%m/%Y') AS HorarioFormatado,
+    r.dado,
+    t.idCategoriaComponente AS categoriaComponente,
+    ROW_NUMBER() OVER (PARTITION BY c.nome ORDER BY r.idRegistro DESC) AS linha_num
+  FROM Registros r
+  JOIN componentes c ON r.fkComponente = c.idComponentes
+   JOIN categoriacomponente t on c.fkCategoriaComponente = t.idCategoriaComponente
+  WHERE r.fkRoboRegistro = 1
+)
+SELECT
+  idRegistro,
+  HorarioFormatado,
+  dado,
+  categoriaComponente
+FROM LinhasComponentes WHERE linha_num <= 7;
+
+WITH LinhasComponentes AS (
+  SELECT
+    r.idRegistro,
+    DATE_FORMAT(r.HorarioDado, '%d/%m/%Y') AS HorarioFormatado,
+    r.dado,
+    c.nome AS nomeComponente,
+    ROW_NUMBER() OVER (PARTITION BY c.nome ORDER BY r.idRegistro DESC) AS linha_num
+  FROM Registros r
+  JOIN componentes c ON r.fkComponente = c.idComponentes
+  WHERE r.fkRoboRegistro = 1
+)
+SELECT
+  idRegistro,
+  HorarioFormatado,
+  dado,
+  nomeComponente
+FROM LinhasComponentes WHERE linha_num <= 7;
+
+-- dados de Dia Opcao 1
+WITH LinhasComponentes AS (
+  SELECT
+    r.HorarioDado,
+    r.dado,
+    c.nome AS nomeComponente
+  FROM Registros r
+  JOIN componentes c ON r.fkComponente = c.idComponentes
+  WHERE r.fkRoboRegistro = 1
+    AND HorarioDado >= NOW() - INTERVAL 24 HOUR
+)
+SELECT
+  DATE_FORMAT(HorarioDado, '%d/%m/%Y %H') as HorarioFormatado,
+  round(AVG(dado),2) AS media_dado,
+  nomeComponente
+FROM LinhasComponentes
+GROUP BY DATE_FORMAT(HorarioDado, '%d/%m/%Y %H'), nomeComponente;
+
+-- dados de Dia Opcao 2
+SELECT
+  DATE_FORMAT(HorarioDado, '%d/%m/%Y %H') as HorarioFormatado,
+  round(AVG(dado),2) AS media_dado,
+  c.nome AS nomeComponente
+FROM Registros r
+JOIN componentes c ON r.fkComponente = c.idComponentes
+WHERE r.fkRoboRegistro = 1
+AND HorarioDado >= NOW() - INTERVAL 24 HOUR AND HorarioDado <= NOW()
+GROUP BY DATE_FORMAT(HorarioDado, '%d/%m/%Y %H'), nomeComponente
+ORDER BY HorarioFormatado;
+
+-- dados de Mes Opcao 1
+SELECT
+  DATE_FORMAT(HorarioDado, '%d/%m/%Y') as HorarioFormatado,
+  round(AVG(dado),2) AS media_dado,
+  c.nome AS nomeComponente
+FROM Registros r
+JOIN componentes c ON r.fkComponente = c.idComponentes
+WHERE r.fkRoboRegistro = 1
+AND HorarioDado >= NOW() - INTERVAL 30 DAY AND HorarioDado <= NOW()
+GROUP BY DATE_FORMAT(HorarioDado, '%d/%m/%Y'), nomeComponente
+ORDER BY HorarioFormatado  
+LIMIT 90;
+
+-- dados de Ano Opcao 1
+SELECT
+  DATE_FORMAT(HorarioDado, '%m/%Y') as HorarioFormatado,
+  round(AVG(dado),2) AS dado,
+  c.nome AS nomeComponente
+FROM Registros r
+JOIN componentes c ON r.fkComponente = c.idComponentes
+WHERE r.fkRoboRegistro = 1
+AND HorarioDado >= NOW() - INTERVAL 1 YEAR AND HorarioDado <= NOW()
+GROUP BY DATE_FORMAT(HorarioDado, '%m/%Y'), nomeComponente
+ORDER BY HorarioFormatado  
+LIMIT 36;
+
+INSERT INTO Registros VALUES(NULL, 1, "2023-11-21 21:56:02", 20.5, 1);
+
+
+
+
+  
