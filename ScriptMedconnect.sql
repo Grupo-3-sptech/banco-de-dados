@@ -301,8 +301,6 @@ LIMIT 36;
 
 INSERT INTO Registros VALUES(NULL, 1, "2023-11-21 21:56:02", 20.5, 1);
 
-SELECT * FROM componentes;
-
 
 
   
