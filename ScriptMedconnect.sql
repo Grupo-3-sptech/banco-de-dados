@@ -118,11 +118,18 @@ INSERT INTO categoriaComponente VALUES
 
 
 INSERT INTO componentes (nome, unidade, fkCategoriaComponente, fkMetrica) 
-VALUES ('Porcentagem da CPU', "%", 1, 1);
+VALUES ('Porcentagem da CPU', "%", 1, 1),
+("Velocidade da CPU", "GHz", 1, null),
+("Tempo no sistema da CPU", "s", 1, null),
+("Processos da CPU", null, 1, null);
 
+SELECT * FROM componentes;
 -- Inserir Memória RAM
 INSERT INTO componentes (nome, unidade, fkCategoriaComponente, fkMetrica) 
-VALUES ('Porcentagem da Memoria', '%', 2, 2);
+VALUES ('Porcentagem da Memoria', '%', 2, 2),
+('Total da Memoria', 'GB', 2, null),
+('Uso da Memoria', 'GB', 2, null),
+('Porcentagem da Memoria Swap', '%',2,null);
 TRUNCATE TABLE componentes;
 
 -- Inserir Disco
