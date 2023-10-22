@@ -161,11 +161,24 @@ constraint fkComponente foreign key (fkComponente) references componentes(idComp
 create table Alerta(
 idAlerta INT PRIMARY KEY auto_increment,
 tipo_alerta VARCHAR(15),
+dtHora DATETIME,
 fkRegistro INT,
 constraint frkRegistro foreign key (fkRegistro) references Registros(idRegistro),
 fkRobo INT,
 constraint frkRobo foreign key (fkRobo) references Registros(fkRoboRegistro)
 );
+
+SELECT * FROM Alerta WHERE 
+tipo_alerta = "critico"
+AND dtHora >= date_sub(now(), INTERVAL 1 MINUTE);
+
+SELECT * FROM Alerta WHERE 
+tipo_alerta = "urgente"
+AND dtHora > date_add(now(), INTERVAL 1 MINUTE);
+
+SELECT * FROM Alerta WHERE 
+tipo_alerta = "alerta"
+AND dtHora > date_add(now(), INTERVAL 1 MINUTE);
 
 DROP TRIGGER criarAlerta;
 DELIMITER //
@@ -183,20 +196,20 @@ DECLARE id_metrica INT;
     INTO id_metrica;
     
     
-    SELECT alerta, urgente, critico
-    INTO v_alerta, v_urgente, v_critico
+    SELECT critico, urgente, alerta
+    INTO v_critico, v_urgente, v_alerta
     FROM Metrica
     WHERE idMetrica = id_metrica;
     
      IF NEW.dado >= v_critico THEN
-        INSERT INTO Alerta (tipo_alerta, fkRegistro, fkRobo)
-        VALUES ("critico", NEW.idRegistro, NEW.fkRoboRegistro);
+        INSERT INTO Alerta (tipo_alerta, fkRegistro, fkRobo, dtHora)
+        VALUES ("critico", NEW.idRegistro, NEW.fkRoboRegistro, now());
      ELSEIF NEW.dado >= v_urgente THEN
-        INSERT INTO Alerta (tipo_alerta, fkRegistro, fkRobo)
-        VALUES ("urgente", NEW.idRegistro, NEW.fkRoboRegistro);
+        INSERT INTO Alerta (tipo_alerta, fkRegistro, fkRobo, dtHora)
+        VALUES ("urgente", NEW.idRegistro, NEW.fkRoboRegistro, now());
 	 ELSEIF NEW.dado >= v_alerta THEN
-        INSERT INTO Alerta (tipo_alerta, fkRegistro, fkRobo)
-        VALUES ("alerta", NEW.idRegistro, NEW.fkRoboRegistro);
+        INSERT INTO Alerta (tipo_alerta, fkRegistro, fkRobo, dtHora)
+        VALUES ("alerta", NEW.idRegistro, NEW.fkRoboRegistro, now());
      END IF;
 	   
 END;
@@ -430,9 +443,4 @@ SELECT idRegistro,HorarioDado, round(dado,2) AS dado, c.nome FROM Registros r
 JOIN componentes c ON r.fkComponente = c.idComponentes
 WHERE c.nome = "Latencia de Rede";
 
-
-
-
-
-
-  
+SELECT * FROM Alerta;
