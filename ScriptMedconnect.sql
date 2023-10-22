@@ -123,23 +123,30 @@ VALUES ('Porcentagem da CPU', "%", 1, 1),
 ("Tempo no sistema da CPU", "s", 1, null),
 ("Processos da CPU", null, 1, null);
 
-SELECT * FROM componentes;
 -- Inserir Memória RAM
 INSERT INTO componentes (nome, unidade, fkCategoriaComponente, fkMetrica) 
 VALUES ('Porcentagem da Memoria', '%', 2, 2),
 ('Total da Memoria', 'GB', 2, null),
 ('Uso da Memoria', 'GB', 2, null),
-('Porcentagem da Memoria Swap', '%',2,null);
-TRUNCATE TABLE componentes;
+('Porcentagem da Memoria Swap', '%',2,null),
+('Uso da Memoria Swap', 'GB', 2, null);
 
 -- Inserir Disco
 INSERT INTO componentes (nome, unidade, fkCategoriaComponente, fkMetrica) 
-VALUES ('Porcentagem do Disco', '%', 3, 3);
+VALUES ('Porcentagem do Disco', '%', 3, 3),
+('Total do Disco', 'GB', 3, null),
+('Uso do Disco', 'GB', 3, null),
+('Tempo de Leitura do Disco', 's', 3, null),
+('Tempo de Escrita do Disco', 's', 3, null);
 
 -- Inserir Rede
 INSERT INTO componentes (nome, descricaoAdd, fkCategoriaComponente) 
-VALUES ('Rede', 'Conexao da Rede', 4);
+VALUES ('Status da Rede', 'Conexao da Rede', 4),
+("Latencia de Rede", 'Latencia em MS', 4),
+('Bytes enviados','Bytes enviados da Rede', 4),
+('Bytes recebidos','Bytes recebidos da Rede', 4);
 
+SELECT * FROM componentes;
 create table Registros (
 idRegistro int auto_increment,
 fkRoboRegistro int , 
@@ -159,16 +166,6 @@ constraint frkRegistro foreign key (fkRegistro) references Registros(idRegistro)
 fkRobo INT,
 constraint frkRobo foreign key (fkRobo) references Registros(fkRoboRegistro)
 );
-
-INSERT INTO Registros VALUES 
-(null, 1, now(), 0.98, 1),
-(null, 1, now(), 0.6, 1),
-(null, 1, now(), 0.7, 1);
-
-SELECT * FROM RoboCirurgiao;
-SELECT * FROM Alerta;
-SELECT * FROM Metrica;
-TRUNCATE TABLE Alerta;
 
 DROP TRIGGER criarAlerta;
 DELIMITER //
@@ -208,19 +205,13 @@ DELIMITER ;
 
 
 INSERT INTO Hospital (nomeFantasia, CNPJ, razaoSocial, sigla, responsavelLegal, fkHospitalSede) 
-VALUES ('Hospital ABC', '12345678901234', 'ABC Ltda', 'HABC', 'João da Silva', NULL);
-
-INSERT INTO Hospital (nomeFantasia, CNPJ, razaoSocial, sigla, responsavelLegal, fkHospitalSede) 
-VALUES ('Hospital Eistein', '12325678901234', 'Eistein Ltda', 'HABC', 'João da Silva', NULL);
+VALUES ('Hospital ABC', '12345678901234', 'ABC Ltda', 'HABC', 'João da Silva', NULL),
+('Hospital Eistein', '12325678901234', 'Eistein Ltda', 'HABC', 'João da Silva', NULL);
 
 INSERT INTO EscalonamentoFuncionario (cargo, prioridade) 
-VALUES ('Atendente', 1);
-
-INSERT INTO EscalonamentoFuncionario (cargo, prioridade) 
-VALUES ('Engenheiro De Noc', 2);
-
-INSERT INTO EscalonamentoFuncionario (cargo, prioridade) 
-VALUES ('Admin', 3);
+VALUES ('Atendente', 1),
+('Engenheiro De Noc', 2),
+('Admin', 3);
 
 SELECT * FROM escalonamentoFuncionario;
 
@@ -339,7 +330,7 @@ SELECT
   HorarioFormatado,
   dado,
   nomeComponente
-FROM LinhasComponentes WHERE linha_num <= 7;
+FROM LinhasComponentes WHERE linha_num <= 1;
 
 -- dados de Dia Opcao 1
 WITH LinhasComponentes AS (
@@ -371,6 +362,18 @@ AND HorarioDado >= NOW() - INTERVAL 24 HOUR AND HorarioDado <= NOW()
 GROUP BY DATE_FORMAT(HorarioDado, '%d/%m/%Y %H'), nomeComponente
 ORDER BY HorarioFormatado;
 
+-- Select do Dia no resumo 
+SELECT
+  DATE_FORMAT(HorarioDado, '%d/%m/%Y') as DiaFormatado,
+  round(AVG(dado), 2) AS media_dado,
+  c.nome AS nomeComponente
+FROM Registros r
+JOIN componentes c ON r.fkComponente = c.idComponentes
+WHERE r.fkRoboRegistro = 1
+  AND HorarioDado >= NOW() - INTERVAL 24 HOUR AND HorarioDado <= NOW()
+GROUP BY DiaFormatado, nomeComponente
+ORDER BY DiaFormatado;
+
 -- dados de Mes Opcao 1
 SELECT
   DATE_FORMAT(HorarioDado, '%d/%m/%Y') as HorarioFormatado,
@@ -383,6 +386,18 @@ AND HorarioDado >= NOW() - INTERVAL 30 DAY AND HorarioDado <= NOW()
 GROUP BY DATE_FORMAT(HorarioDado, '%d/%m/%Y'), nomeComponente
 ORDER BY HorarioFormatado  
 LIMIT 90;
+
+-- Select do Mes no resumo 
+SELECT
+  DATE_FORMAT(HorarioDado, '%m/%Y') as MesFormatado,
+  round(AVG(dado), 2) AS media_dado,
+  c.nome AS nomeComponente
+FROM Registros r
+JOIN componentes c ON r.fkComponente = c.idComponentes
+WHERE r.fkRoboRegistro = 1
+  AND HorarioDado >= NOW() - INTERVAL 30 DAY AND HorarioDado <= NOW()
+GROUP BY MesFormatado, nomeComponente
+ORDER BY MesFormatado;
 
 -- dados de Ano Opcao 1
 SELECT
@@ -397,7 +412,25 @@ GROUP BY DATE_FORMAT(HorarioDado, '%m/%Y'), nomeComponente
 ORDER BY HorarioFormatado  
 LIMIT 36;
 
+-- SELECT de ano resumo
+SELECT
+  DATE_FORMAT(HorarioDado, '%Y') as AnoFormatado,
+  ROUND(AVG(dado), 2) AS media_dado,
+  c.nome AS nomeComponente
+FROM Registros r
+JOIN componentes c ON r.fkComponente = c.idComponentes
+WHERE r.fkRoboRegistro = 1
+  AND HorarioDado >= NOW() - INTERVAL 365 DAY AND HorarioDado <= NOW()
+GROUP BY AnoFormatado, nomeComponente
+ORDER BY AnoFormatado;
+
 INSERT INTO Registros VALUES(NULL, 1, "2023-11-21 21:56:02", 20.5, 1);
+
+SELECT idRegistro,HorarioDado, round(dado,2) AS dado, c.nome FROM Registros r
+JOIN componentes c ON r.fkComponente = c.idComponentes
+WHERE c.nome = "Latencia de Rede";
+
+
 
 
 
