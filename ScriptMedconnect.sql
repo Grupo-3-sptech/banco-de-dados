@@ -146,6 +146,31 @@ VALUES ('Status da Rede', 'Conexao da Rede', 4),
 ('Bytes enviados','Bytes enviados da Rede', 4),
 ('Bytes recebidos','Bytes recebidos da Rede', 4);
 
+CREATE TABLE dispositivos_usb (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(255),
+    dataHora DATETIME,
+    id_produto VARCHAR(10),
+    fornecedor VARCHAR(255),
+    conectado BOOLEAN,
+    fkRoboUsb int , 
+constraint fkRoboUsb foreign key (fkRoboUsb) references  RoboCirurgiao(idRobo)
+);
+
+SELECT DISTINCT nome, dataHora, conectado FROM dispositivos_usb;
+SELECT nome, MAX(dataHora) AS dataHora, MAX(conectado) AS conectado
+FROM dispositivos_usb
+GROUP BY nome;
+
+-- BUSCAR POR USB
+SELECT DISTINCT nome, DATE_FORMAT(MAX(dataHora),'%d/%m/%Y %H:%i:%s') AS dataHora FROM dispositivos_usb WHERE conectado = 1 AND fkRoboUsb = 2
+GROUP BY nome;
+
+select distinct nome from dispositivos_usb;
+
+select * from dispositivos_usb; 
+
+
 SELECT * FROM componentes;
 create table Registros (
 idRegistro int auto_increment,
@@ -422,8 +447,7 @@ JOIN componentes c ON r.fkComponente = c.idComponentes
 WHERE r.fkRoboRegistro = 1
 AND HorarioDado >= NOW() - INTERVAL 1 YEAR AND HorarioDado <= NOW()
 GROUP BY DATE_FORMAT(HorarioDado, '%m/%Y'), nomeComponente
-ORDER BY HorarioFormatado  
-LIMIT 36;
+ORDER BY HorarioFormatado ;
 
 -- SELECT de ano resumo
 SELECT
@@ -437,7 +461,29 @@ WHERE r.fkRoboRegistro = 1
 GROUP BY AnoFormatado, nomeComponente
 ORDER BY AnoFormatado;
 
-INSERT INTO Registros VALUES(NULL, 1, "2023-11-21 21:56:02", 20.5, 1);
+-- TESTES DE MUDANÇA DE GRÁFICO ANO ------------------------------
+-- DISCO
+INSERT INTO Registros VALUES(NULL, 1, "2023-09-12 21:20:00", 900, 12);
+
+-- LATENCIA DE REDE 
+INSERT INTO Registros VALUES(NULL, 1, "2023-09-12 23:20:00", 90, 16),
+(NULL, 1, "2023-03-12 13:50:02", 20, 16),
+(NULL, 1, "2023-02-12 18:20:23", 20, 16);
+
+-- Porcentagem CPU 
+INSERT INTO Registros VALUES(NULL, 1, "2023-09-12 23:20:00", 90, 1),
+(NULL, 1, "2023-05-12 13:50:02", 20, 1),
+(NULL, 1, "2023-02-12 18:20:23", 20, 1);
+
+-- Porcentagem MEMORIA 
+INSERT INTO Registros VALUES(NULL, 1, "2023-09-12 23:20:00", 90, 5),
+(NULL, 1, "2023-01-12 13:50:02", 20, 5),
+(NULL, 1, "2023-06-12 18:20:23", 20, 5);
+
+
+select * from componentes;
+select * from registros;
+
 
 SELECT idRegistro,HorarioDado, round(dado,2) AS dado, c.nome FROM Registros r
 JOIN componentes c ON r.fkComponente = c.idComponentes
