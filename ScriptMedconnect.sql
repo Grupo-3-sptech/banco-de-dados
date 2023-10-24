@@ -157,14 +157,19 @@ CREATE TABLE dispositivos_usb (
 constraint fkRoboUsb foreign key (fkRoboUsb) references  RoboCirurgiao(idRobo)
 );
 
-SELECT DISTINCT nome, dataHora, conectado FROM dispositivos_usb;
-SELECT nome, MAX(dataHora) AS dataHora, MAX(conectado) AS conectado
-FROM dispositivos_usb
+
+
+SELECT DISTINCT nome, DATE_FORMAT(MAX(dataHora),'%d/%m/%Y %H:%i:%s') as dataHora FROM dispositivos_usb WHERE conectado = 1 AND fkRoboUsb = 2
 GROUP BY nome;
 
 -- BUSCAR POR USB
 SELECT DISTINCT nome, DATE_FORMAT(MAX(dataHora),'%d/%m/%Y %H:%i:%s') AS dataHora FROM dispositivos_usb WHERE conectado = 1 AND fkRoboUsb = 2
 GROUP BY nome;
+
+SELECT DISTINCT nome, DATE_FORMAT(MAX(dataHora),'%d/%m/%Y %H:%i:%s') AS dataHora FROM dispositivos_usb WHERE conectado = 0 AND fkRoboUsb = 2
+GROUP BY nome;
+
+SELECT * FROM dispositivos_usb;
 
 select distinct nome from dispositivos_usb;
 
@@ -395,7 +400,7 @@ SELECT
   c.nome AS nomeComponente
 FROM Registros r
 JOIN componentes c ON r.fkComponente = c.idComponentes
-WHERE r.fkRoboRegistro = 1
+WHERE r.fkRoboRegistro = 2
 AND HorarioDado >= NOW() - INTERVAL 24 HOUR AND HorarioDado <= NOW()
 GROUP BY DATE_FORMAT(HorarioDado, '%d/%m/%Y %H'), nomeComponente
 ORDER BY HorarioFormatado;
@@ -461,32 +466,98 @@ WHERE r.fkRoboRegistro = 1
 GROUP BY AnoFormatado, nomeComponente
 ORDER BY AnoFormatado;
 
--- TESTES DE MUDANÇA DE GRÁFICO ANO ------------------------------
--- DISCO
-INSERT INTO Registros VALUES(NULL, 1, "2023-09-12 21:20:00", 900, 12);
 
+-- TESTES INSERTS DIA:
 -- LATENCIA DE REDE 
-INSERT INTO Registros VALUES(NULL, 1, "2023-09-12 23:20:00", 90, 16),
-(NULL, 1, "2023-03-12 13:50:02", 20, 16),
-(NULL, 1, "2023-02-12 18:20:23", 20, 16);
+INSERT INTO Registros VALUES(NULL, 2, "2023-10-23 18:00:00", 10, 16),
+(NULL, 2, "2023-10-23 19:00:00", 10, 16),
+(NULL, 2,"2023-10-23 17:00:00", 20, 16),
+(NULL, 2,"2023-10-23 16:00:00", 30, 16),
+(NULL, 2,"2023-10-23 15:00:00", 90, 16),
+(NULL, 2,"2023-10-23 13:00:00", 50, 16),
+(NULL, 2, "2023-10-23 14:00:00", 20, 16);
 
--- Porcentagem CPU 
-INSERT INTO Registros VALUES(NULL, 1, "2023-09-12 23:20:00", 90, 1),
-(NULL, 1, "2023-05-12 13:50:02", 20, 1),
-(NULL, 1, "2023-02-12 18:20:23", 20, 1);
+-- PORCENTAGEM CPU
+INSERT INTO Registros VALUES
+(NULL, 2, "2023-10-23 18:00:00", 20, 1),
+(NULL, 2, "2023-10-23 19:00:00", 10, 1),
+(NULL, 2,"2023-10-23 17:00:00", 30, 1),
+(NULL, 2,"2023-10-23 16:00:00", 10, 1),
+(NULL, 2,"2023-10-23 15:00:00", 60, 1),
+(NULL, 2,"2023-10-23 13:00:00", 20, 1),
+(NULL, 2, "2023-10-23 14:00:00", 90, 1);
 
--- Porcentagem MEMORIA 
-INSERT INTO Registros VALUES(NULL, 1, "2023-09-12 23:20:00", 90, 5),
-(NULL, 1, "2023-01-12 13:50:02", 20, 5),
-(NULL, 1, "2023-06-12 18:20:23", 20, 5);
+select * from registros where fkRoboregistro = 2;
+
+-- PORCENTAGEM MEMORIA
+INSERT INTO Registros VALUES
+(NULL, 2, "2023-10-23 18:00:00", 22, 5),
+(NULL, 2, "2023-10-23 19:00:00", 42, 5),
+(NULL, 2,"2023-10-23 17:00:00", 33, 5),
+(NULL, 2,"2023-10-23 16:00:00", 54, 5),
+(NULL, 2,"2023-10-23 15:00:00", 10, 5),
+(NULL, 2,"2023-10-23 13:00:00", 22, 5),
+(NULL, 2, "2023-10-23 14:00:00", 31, 5);
+
+-- TESTES INSERTS MES:
+-- LATENCIA DE REDE
+INSERT INTO Registros VALUES
+(NULL, 2, NOW() - INTERVAL 23 DAY, 90, 16),
+(NULL, 2, NOW() - INTERVAL 22 DAY, 80, 16),
+(NULL, 2, NOW() - INTERVAL 21 DAY, 70, 16),
+(NULL, 2, NOW() - INTERVAL 20 DAY, 60, 16),
+(NULL, 2, NOW() - INTERVAL 19 DAY, 50, 16),
+(NULL, 2, NOW() - INTERVAL 18 DAY, 40, 16),
+(NULL, 2, NOW() - INTERVAL 17 DAY, 30, 16);
+
+-- Porcentagem CPU
+INSERT INTO Registros VALUES
+(NULL, 2, NOW() - INTERVAL 23 DAY, 90, 1),
+(NULL, 2, NOW() - INTERVAL 22 DAY, 80, 1),
+(NULL, 2, NOW() - INTERVAL 21 DAY, 70, 1),
+(NULL, 2, NOW() - INTERVAL 20 DAY, 60, 1),
+(NULL, 2, NOW() - INTERVAL 19 DAY, 50, 1),
+(NULL, 2, NOW() - INTERVAL 18 DAY, 40, 1),
+(NULL, 2, NOW() - INTERVAL 17 DAY, 30, 1);
+
+-- Porcentagem MEMORIA
+INSERT INTO Registros VALUES
+(NULL, 2, NOW() - INTERVAL 23 DAY, 90, 5),
+(NULL, 2, NOW() - INTERVAL 22 DAY, 80, 5),
+(NULL, 2, NOW() - INTERVAL 21 DAY, 70, 5),
+(NULL, 2, NOW() - INTERVAL 20 DAY, 60, 5),
+(NULL, 2, NOW() - INTERVAL 19 DAY, 50, 5),
+(NULL, 2, NOW() - INTERVAL 18 DAY, 40, 5),
+(NULL, 2, NOW() - INTERVAL 17 DAY, 30, 5);
 
 
-select * from componentes;
-select * from registros;
+-- TESTES INSERT ANO
+-- LATENCIA DE REDE
+INSERT INTO Registros VALUES
+(NULL, 2, NOW() - INTERVAL 11 MONTH, 90, 16),
+(NULL, 2, NOW() - INTERVAL 10 MONTH, 80, 16),
+(NULL, 2, NOW() - INTERVAL 9 MONTH, 70, 16),
+(NULL, 2, NOW() - INTERVAL 8 MONTH, 60, 16),
+(NULL, 2, NOW() - INTERVAL 7 MONTH, 50, 16),
+(NULL, 2, NOW() - INTERVAL 6 MONTH, 40, 16),
+(NULL, 2, NOW() - INTERVAL 5 MONTH, 30, 16);
 
+-- Porcentagem CPU
+INSERT INTO Registros VALUES
+(NULL, 2, NOW() - INTERVAL 11 MONTH, 90, 1),
+(NULL, 2, NOW() - INTERVAL 10 MONTH, 80, 1),
+(NULL, 2, NOW() - INTERVAL 9 MONTH, 70, 1),
+(NULL, 2, NOW() - INTERVAL 8 MONTH, 60, 1),
+(NULL, 2, NOW() - INTERVAL 7 MONTH, 50, 1),
+(NULL, 2, NOW() - INTERVAL 6 MONTH, 40, 1),
+(NULL, 2, NOW() - INTERVAL 5 MONTH, 30, 1);
 
-SELECT idRegistro,HorarioDado, round(dado,2) AS dado, c.nome FROM Registros r
-JOIN componentes c ON r.fkComponente = c.idComponentes
-WHERE c.nome = "Latencia de Rede";
-
-SELECT * FROM Alerta;
+-- Porcentagem MEMORIA
+INSERT INTO Registros VALUES
+(NULL, 2, NOW() - INTERVAL 11 MONTH, 90, 5),
+(NULL, 2, NOW() - INTERVAL 10 MONTH, 80, 5),
+(NULL, 2, NOW() - INTERVAL 9 MONTH, 70, 5),
+(NULL, 2, NOW() - INTERVAL 8 MONTH, 60, 5),
+(NULL, 2, NOW() - INTERVAL 7 MONTH, 50, 5),
+(NULL, 2, NOW() - INTERVAL 6 MONTH, 40, 5),
+(NULL, 2, NOW() - INTERVAL 5 MONTH, 30, 5);
