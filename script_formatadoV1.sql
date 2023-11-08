@@ -21,23 +21,23 @@ VALUES
     ('Hospital ABC', '12345678901234', 'ABC Ltda', 'HABC', 'João da Silva', NULL),
     ('Hospital Einstein', '12325678901234', 'Einstein Ltda', 'HEIN', 'Maria Silva', NULL);
 
--- Crie a tabela EscalonamentoFuncionario
-CREATE TABLE IF NOT EXISTS EscalonamentoFuncionario (
+-- Crie a tabela EscalonamentoUsuario
+CREATE TABLE IF NOT EXISTS EscalonamentoUsuario (
     idEscalonamento INT PRIMARY KEY AUTO_INCREMENT,
     cargo VARCHAR(45) NOT NULL,
     prioridade INT NOT NULL
 );
 
--- Inserir dados na tabela EscalonamentoFuncionario
-INSERT INTO EscalonamentoFuncionario (cargo, prioridade) 
+-- Inserir dados na tabela EscalonamentoUsuario
+INSERT INTO EscalonamentoUsuario (cargo, prioridade) 
 VALUES 
     ('Atendente', 1),
     ('Engenheiro De Noc', 2),
     ('Admin', 3);
 
--- Crie a tabela Funcionarios
-CREATE TABLE IF NOT EXISTS Funcionarios (
-    idFuncionarios INT AUTO_INCREMENT,
+-- Crie a tabela Usuario
+CREATE TABLE IF NOT EXISTS Usuario (
+    idUsuario INT AUTO_INCREMENT,
     nome VARCHAR(45) NOT NULL,
     email VARCHAR(45) NOT NULL,
     CPF VARCHAR(15) NOT NULL,
@@ -45,13 +45,13 @@ CREATE TABLE IF NOT EXISTS Funcionarios (
     senha VARCHAR(45) NOT NULL,
     fkHospital INT,
     fkEscalonamento INT,
-    PRIMARY KEY (idFuncionarios, fkHospital),
+    PRIMARY KEY (idUsuario, fkHospital),
     CONSTRAINT fkHospital FOREIGN KEY (fkHospital) REFERENCES Hospital (idHospital),
-    CONSTRAINT fkEscalonamento FOREIGN KEY (fkEscalonamento) REFERENCES EscalonamentoFuncionario (idEscalonamento)
+    CONSTRAINT fkEscalonamento FOREIGN KEY (fkEscalonamento) REFERENCES EscalonamentoUsuario (idEscalonamento)
 );
 
--- Inserir dados na tabela Funcionarios
-INSERT INTO Funcionarios (nome, email, CPF, telefone, senha, fkHospital, fkEscalonamento) 
+-- Inserir dados na tabela Usuario
+INSERT INTO Usuario (nome, email, CPF, telefone, senha, fkHospital, fkEscalonamento) 
 VALUES 
     ('Kayky', 'kayky@abc.com', '12345678901', '987654321', '123456', 1, 1),
     ('Gabriel', 'gabriel@email.com', '12345678901', '987654321', '123456', 1, 2),
@@ -83,19 +83,6 @@ CREATE TABLE IF NOT EXISTS RoboCirurgiao (
 INSERT INTO RoboCirurgiao (modelo, fabricacao, fkStatus, fkHospital, idProcess) 
 VALUES ('Modelo A', '2023-09-12', 1, 1, 'B2532B6');
 
--- Crie a tabela associado
-CREATE TABLE IF NOT EXISTS associado (
-    idAssociado INT PRIMARY KEY AUTO_INCREMENT,
-    email VARCHAR(45),
-    fkEscalonamentoFuncionario INT,
-    fkHospital INT,
-    CONSTRAINT fkEscalonamentoFunc FOREIGN KEY (fkEscalonamentoFuncionario) REFERENCES EscalonamentoFuncionario (idEscalonamento),
-    CONSTRAINT fkHospitalAssociado FOREIGN KEY (fkHospital) REFERENCES Hospital (idHospital)
-);
-
--- Inserir dados na tabela associado
-INSERT INTO associado VALUES (null, 'erick@email.com', 1, 1);
-
 -- Crie a tabela SalaCirurgiao
 CREATE TABLE IF NOT EXISTS SalaCirurgiao (
     idSala INT AUTO_INCREMENT,
@@ -125,15 +112,19 @@ VALUES ('Alto');
 CREATE TABLE IF NOT EXISTS cirurgia (
     idCirurgia INT NOT NULL,
     fkRoboCirurgia INT,
-    dataHorario DATETIME NOT NULL,
+    dataInicio DATETIME NOT NULL,
+    nomeMedico VARCHAR(45),
+    duracao INT,
+    nomePaciente VARCHAR(45),
+    tipo VARCHAR(45),
     fkCategoria INT,
     CONSTRAINT fkRoboCirurgia FOREIGN KEY (fkRoboCirurgia) REFERENCES RoboCirurgiao (idRobo),
     CONSTRAINT fkCategoria FOREIGN KEY (fkCategoria) REFERENCES categoriaCirurgia (idCategoria)
 );
 
 -- Inserir dados na tabela cirurgia
-INSERT INTO cirurgia (idCirurgia, fkRoboCirurgia, dataHorario, fkCategoria) 
-VALUES (1, 1, '2023-09-15 14:00:00', 1);
+INSERT INTO cirurgia (idCirurgia, fkRoboCirurgia, dataInicio, nomeMedico, duracao, nomePaciente, tipo, fkCategoria) 
+VALUES (1, 1, '2023-09-15 14:00:00', "Dr. Henrique Castro", 134, "Alberto Fernandez","cardiologia",1);
 
 -- Crie a tabela Metrica
 CREATE TABLE IF NOT EXISTS Metrica (
@@ -225,7 +216,7 @@ VALUES ('Status da Rede', 'Conexao da Rede', 4),
 
 
 SELECT * FROM componentes;
-CREATE TABLE dispositivos_usb (
+CREATE TABLE  IF NOT EXISTS dispositivos_usb (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(255),
     dataHora DATETIME,
