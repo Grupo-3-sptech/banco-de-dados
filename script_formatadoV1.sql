@@ -83,19 +83,6 @@ CREATE TABLE IF NOT EXISTS RoboCirurgiao (
 INSERT INTO RoboCirurgiao (modelo, fabricacao, fkStatus, fkHospital, idProcess) 
 VALUES ('Modelo A', '2023-09-12', 1, 1, 'B2532B6');
 
--- Crie a tabela associado
-CREATE TABLE IF NOT EXISTS associado (
-    idAssociado INT PRIMARY KEY AUTO_INCREMENT,
-    email VARCHAR(45),
-    fkEscalonamentoFuncionario INT,
-    fkHospital INT,
-    CONSTRAINT fkEscalonamentoFunc FOREIGN KEY (fkEscalonamentoFuncionario) REFERENCES EscalonamentoFuncionario (idEscalonamento),
-    CONSTRAINT fkHospitalAssociado FOREIGN KEY (fkHospital) REFERENCES Hospital (idHospital)
-);
-
--- Inserir dados na tabela associado
-INSERT INTO associado VALUES (null, 'erick@email.com', 1, 1);
-
 -- Crie a tabela SalaCirurgiao
 CREATE TABLE IF NOT EXISTS SalaCirurgiao (
     idSala INT AUTO_INCREMENT,
@@ -125,15 +112,19 @@ VALUES ('Alto');
 CREATE TABLE IF NOT EXISTS cirurgia (
     idCirurgia INT NOT NULL,
     fkRoboCirurgia INT,
-    dataHorario DATETIME NOT NULL,
+    dataInicio DATETIME NOT NULL,
+    nomeMedico VARCHAR(45),
+    duracao INT,
+    nomePaciente VARCHAR(45),
+    tipo VARCHAR(45),
     fkCategoria INT,
     CONSTRAINT fkRoboCirurgia FOREIGN KEY (fkRoboCirurgia) REFERENCES RoboCirurgiao (idRobo),
     CONSTRAINT fkCategoria FOREIGN KEY (fkCategoria) REFERENCES categoriaCirurgia (idCategoria)
 );
 
 -- Inserir dados na tabela cirurgia
-INSERT INTO cirurgia (idCirurgia, fkRoboCirurgia, dataHorario, fkCategoria) 
-VALUES (1, 1, '2023-09-15 14:00:00', 1);
+INSERT INTO cirurgia (idCirurgia, fkRoboCirurgia, dataInicio, nomeMedico, duracao, nomePaciente, tipo, fkCategoria) 
+VALUES (1, 1, '2023-09-15 14:00:00', "Dr. Henrique Castro", 134, "Alberto Fernandez","cardiologia",1);
 
 -- Crie a tabela Metrica
 CREATE TABLE IF NOT EXISTS Metrica (
