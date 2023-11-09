@@ -73,6 +73,7 @@ CREATE TABLE IF NOT EXISTS RoboCirurgiao (
     modelo VARCHAR(45) NOT NULL,
     fabricacao VARCHAR(45) NOT NULL,
     idProcess VARCHAR(45),
+    telaAtual varchar(40),
     fkStatus INT,
     fkHospital INT,
     CONSTRAINT fkStatus FOREIGN KEY (fkStatus) REFERENCES statusRobo (idStatus),
