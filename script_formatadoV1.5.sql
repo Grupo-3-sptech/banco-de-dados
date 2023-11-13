@@ -111,15 +111,15 @@ VALUES ('Alto');
 
 -- Crie a tabela cirurgia
 CREATE TABLE IF NOT EXISTS cirurgia (
-    idCirurgia INT NOT NULL,
-    fkRoboCirurgia INT,
+    idCirurgia INT AUTO_INCREMENT PRIMARY KEY NOT NULL,
     dataInicio DATETIME NOT NULL,
     nomeMedico VARCHAR(45),
     duracao INT,
     nomePaciente VARCHAR(45),
     tipo VARCHAR(45),
-    fkCategoria INT,
+    fkRoboCirurgia INT,
     CONSTRAINT fkRoboCirurgia FOREIGN KEY (fkRoboCirurgia) REFERENCES RoboCirurgiao (idRobo),
+    fkCategoria INT,
     CONSTRAINT fkCategoria FOREIGN KEY (fkCategoria) REFERENCES categoriaCirurgia (idCategoria)
 );
 
