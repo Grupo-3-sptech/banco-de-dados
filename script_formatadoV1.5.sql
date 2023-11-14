@@ -82,7 +82,7 @@
     
     create table if not exists Janela(
     idJanela int primary key auto_increment,
-    Janela_atual varchar(60),
+    Janela_atual varchar(100),
     ativo tinyint,
     fkMaquina int,
     constraint fkMaquina foreign key (fkMaquina) references RoboCirurgiao (idRobo)
@@ -90,7 +90,7 @@
     
     create table if not exists Janela_fechada(
     idJanela_fechada int primary key auto_increment,
-    janela_a_fechar varchar(30),
+    janela_a_fechar varchar(100),
     sinal_terminacao tinyint,
     fkMaquina1 int,
     constraint fkMaquina1 foreign key (fkMaquina1) references RoboCirurgiao (idRobo)
@@ -187,7 +187,8 @@
 		(1, 'CPU'),
 		(2, 'Memória RAM'),
 		(3, 'Disco'),
-		(4, 'Rede');
+		(4, 'Rede'),
+        (5, 'Processos');
 
 	-- Crie a tabela componentes
 	CREATE TABLE IF NOT EXISTS componentes (
@@ -234,6 +235,9 @@
 	("Latencia de Rede", 'Latencia em MS', 4, 10),
 	('Bytes enviados','Bytes enviados da Rede', 4, null),
 	('Bytes recebidos','Bytes recebidos da Rede', 4, null);
+    
+    INSERT INTO componentes (nome, descricaoAdd, fkCategoriaComponente, fkMetrica) 
+	VALUES ('Quantidade de processos', 'Quantidades de processos em execução', 5, null);
 
 	CREATE TABLE dispositivos_usb (
 		id INT AUTO_INCREMENT PRIMARY KEY,
@@ -257,6 +261,7 @@
 		CONSTRAINT fkRoboRegistro FOREIGN KEY (fkRoboRegistro) REFERENCES RoboCirurgiao (idRobo),
 		CONSTRAINT fkComponente FOREIGN KEY (fkComponente) REFERENCES componentes (idComponentes)
 	);
+    
 
 	-- Crie a tabela Alerta
 	CREATE TABLE IF NOT EXISTS Alerta (
