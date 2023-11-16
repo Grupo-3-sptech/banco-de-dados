@@ -211,7 +211,8 @@
 	VALUES ('Porcentagem da CPU', "%", 1, 1),
 	("Velocidade da CPU", "GHz", 1, null),
 	("Tempo no sistema da CPU", "s", 1, 3),
-	("Processos da CPU", null, 1, null);
+	("Processos da CPU", null, 1, null),
+	("Temperatura da CPU", "°C", 1, null);
 
 	-- Inserir Memória RAM
 	INSERT INTO componentes (nome, unidade, fkCategoriaComponente, fkMetrica) 
