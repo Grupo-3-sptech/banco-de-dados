@@ -212,7 +212,9 @@
 	("Velocidade da CPU", "GHz", 1, null),
 	("Tempo no sistema da CPU", "s", 1, 3),
 	("Processos da CPU", null, 1, null),
-	("Temperatura da CPU", "°C", 1, null);
+	("Temperatura da CPU", "°C", 1, null),
+	("Total de processos", "processos", 1, null),
+	("Total de Threads", "threads", 1, null);
 
 	-- Inserir Memória RAM
 	INSERT INTO componentes (nome, unidade, fkCategoriaComponente, fkMetrica) 
@@ -366,5 +368,22 @@
 	END;
 	$$ DELIMITER 
 
+	-- Criar a tabela processos
+	CREATE TABLE IF NOT EXISTS Processos (
+	    idProcesso INT PRIMARY KEY AUTO_INCREMENT,
+	    pid INT,
+	    nome VARCHAR(45),
+	    processo_status VARCHAR(20),
+	    momento_inicio DATETIME,
+	    fkRobo INT,
+		CONSTRAINT fkRoboProcesso FOREIGN KEY (fkRobo) REFERENCES RoboCirurgiao (idRobo)
+	);
+
+	-- Select Bianca
+	SELECT registros.HorarioDado, round(registros.dado, 2) AS dado, componentes.nome, componentes.unidade 
+	FROM registros 
+	JOIN componentes 
+	ON componentes.idComponentes = registros.fkComponente;
+		
 	-- Mostrar as tabelas do banco de dados
 	SHOW TABLES;
