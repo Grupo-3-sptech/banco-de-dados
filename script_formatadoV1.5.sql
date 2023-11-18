@@ -372,11 +372,12 @@
 	CREATE TABLE IF NOT EXISTS Processos (
 	    idProcesso INT PRIMARY KEY AUTO_INCREMENT,
 	    pid INT,
-	    nome VARCHAR(45),
+	    nome VARCHAR(100),
 	    processo_status VARCHAR(20),
 	    momento_inicio DATETIME,
+	    data_hora_captura DATETIME,
 	    fkRobo INT,
-		CONSTRAINT fkRoboProcesso FOREIGN KEY (fkRobo) REFERENCES RoboCirurgiao (idRobo)
+			CONSTRAINT fkRoboProcesso FOREIGN KEY (fkRobo) REFERENCES RoboCirurgiao (idRobo)
 	);
 
 	-- Select Bianca
