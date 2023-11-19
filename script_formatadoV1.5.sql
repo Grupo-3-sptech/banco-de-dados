@@ -125,7 +125,11 @@
 
 	-- Inserir dados na tabela categoriaCirurgia
 	INSERT INTO categoriaCirurgia (niveisPericuloridade) 
-	VALUES ('Alto');
+	VALUES ("Muito baixo"),
+    ("Baixo"),
+    ("Médio"),
+    ("Alto"),
+    ("Muito Alto");
 
 	-- Crie a tabela cirurgia
 	CREATE TABLE IF NOT EXISTS cirurgia (
