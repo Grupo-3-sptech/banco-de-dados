@@ -162,7 +162,8 @@
 	INSERT INTO Metrica (idMetrica, alerta, urgente, critico, tipo_dado)
 	VALUES
 	(1, 60, 70, 80, 'Porcentagem de Uso'),
-	(3, 10700, 10800, 10900, 'Tempo no sistema');
+	(3, 264, 275, 300, 'Processos'),
+    (11, 0.4, 0.3, 0.2, 'Velocidade');
 
 	-- Inserir Métricas de RAM
 	INSERT INTO Metrica (idMetrica, alerta, urgente, critico, tipo_dado)
@@ -213,9 +214,9 @@
 	-- Inserir CPU
 	INSERT INTO componentes (nome, unidade, fkCategoriaComponente, fkMetrica) 
 	VALUES ('Porcentagem da CPU', "%", 1, 1),
-	("Velocidade da CPU", "GHz", 1, null),
-	("Tempo no sistema da CPU", "s", 1, 3),
-	("Processos da CPU", null, 1, null),
+	("Velocidade da CPU", "GHz", 1, 11),
+	("Tempo no sistema da CPU", "s", 1, null),
+	("Processos da CPU", null, 1, 3),
 	("Temperatura da CPU", "°C", 1, null),
 	("Total de processos", "processos", 1, null),
 	("Total de Threads", "threads", 1, null);
@@ -237,13 +238,13 @@
 	('Tempo de Escrita do Disco', 's', 3, null);
 
 	-- Inserir Rede
-	INSERT INTO componentes (nome, descricaoAdd, fkCategoriaComponente, fkMetrica) 
-	VALUES ('Status da Rede', 'Conexao da Rede', 4, null),
-	("Latencia de Rede", 'Latencia em MS', 4, 10),
+	INSERT INTO componentes (nome, unidade, descricaoAdd, fkCategoriaComponente, fkMetrica) 
+	VALUES ('Status da Rede', null, 'Conexao da Rede', 4, null),
+	("Latencia de Rede", 'ms','Latencia em MS', 4, 10),
 	('Bytes enviados','Bytes enviados da Rede', 4, null),
 	('Bytes recebidos','Bytes recebidos da Rede', 4, null);
     
-    INSERT INTO componentes (nome, descricaoAdd, fkCategoriaComponente, fkMetrica) 
+    INSERT INTO componentes (nome, unidade, descricaoAdd, fkCategoriaComponente, fkMetrica) 
 	VALUES ('Quantidade de processos', 'Quantidades de processos em execução', 5, null);
 
 	CREATE TABLE dispositivos_usb (
@@ -392,3 +393,181 @@
 		
 	-- Mostrar as tabelas do banco de dados
 	SHOW TABLES;
+    
+SELECT 
+    a.tipo_alerta,
+    a.dado,
+    a.fkRobo,
+    DATE_FORMAT(a.dtHora, '%d/%m/%Y %H:%i:%s') as dtHoraComponente,
+    a.nome_componente,
+    s.numero,
+    DATE_FORMAT(c.dataInicio, '%d/%m/%Y %H:%i:%s') as dtHoraCirurgia,
+    DATE_FORMAT(TIMESTAMPADD(MINUTE, c.duracao, c.dataInicio), '%d/%m/%Y %H:%i:%s') as dtHoraFimCirurgia,
+    c.duracao,
+    c.nomePaciente,
+    c.nomeMedico,
+    c.tipo,
+    cr.niveisPericuloridade as risco
+        FROM 
+            alerta a
+        JOIN 
+            salaCirurgiao s ON s.fkRoboSala = a.fkRobo
+        JOIN 
+            cirurgia c ON a.dtHora BETWEEN c.dataInicio AND TIMESTAMPADD(MINUTE, c.duracao, c.dataInicio)
+		JOIN 
+			RoboCirurgiao r ON r.fkHospital = 1
+        JOIN categoriaCirurgia cr ON c.fkCategoria = cr.idCategoria;
+            
+           
+
+SELECT * FROM Alerta;
+SELECT * FROM categoriaCirurgia;
+select * from salaCirurgiao;
+
+WITH LinhasComponentes AS (
+          SELECT
+            r.idRegistro,
+            FORMAT(r.HorarioDado, '%HH:%mm:%ss') AS HorarioFormatado,
+            r.dado,
+            c.nome AS nomeComponente,
+            ROW_NUMBER() OVER (PARTITION BY c.nome ORDER BY r.idRegistro DESC) AS linha_num
+          FROM Registros r
+          JOIN componentes c ON r.fkComponente = c.idComponentes
+          WHERE r.fkRoboRegistro = 1
+          AND c.nome = "Porcentagem da CPU"
+        )
+        SELECT
+          idRegistro,
+          HorarioFormatado,
+          dado,
+          nomeComponente
+        FROM LinhasComponentes WHERE linha_num <= 30;
+        
+        
+        WITH LinhasComponentes AS (
+          SELECT
+            r.idRegistro,
+            DATE_FORMAT(r.HorarioDado, '%H h %i m %s s') AS HorarioFormatado,
+            r.dado,
+            c.nome AS nomeComponente,
+            ROW_NUMBER() OVER (PARTITION BY c.nome ORDER BY r.idRegistro DESC) AS linha_num
+          FROM Registros r
+          JOIN componentes c ON r.fkComponente = c.idComponentes
+          JOIN cirurgia cr ON cr.fkRoboCirurgia = r.fkRoboRegistro
+          WHERE r.fkRoboRegistro = 1
+          AND c.nome = 'Velocidade da CPU'
+          AND HorarioDado BETWEEN cr.dataInicio AND TIMESTAMPADD(MINUTE, cr.duracao, cr.dataInicio)
+        )
+        SELECT
+          idRegistro,
+          HorarioFormatado,
+          dado,
+          nomeComponente
+        FROM LinhasComponentes WHERE linha_num <= 100;
+        
+        
+        select * from Registros;
+        
+        INSERT INTO Registros VALUES (NULL, 1, '2023-11-24 23:00:00', 5.8, 2);
+        
+        SELECT 
+    a.tipo_alerta,
+    a.dado,
+    a.fkRobo,
+    DATE_FORMAT(a.dtHora, '%d/%m/%Y %H:%i:%s') as dtHoraComponente,
+    a.nome_componente,
+    s.numero,
+    DATE_FORMAT(c.dataInicio, '%d/%m/%Y %H:%i:%s') as dtHoraCirurgia,
+    DATE_FORMAT(TIMESTAMPADD(MINUTE, c.duracao, c.dataInicio), '%d/%m/%Y %H:%i:%s') as dtHoraFimCirurgia,
+    c.duracao,
+    c.nomePaciente,
+    c.nomeMedico,
+    c.tipo,
+    cr.niveisPericuloridade as risco
+        FROM 
+            alerta a
+        JOIN 
+            salaCirurgiao s ON s.fkRoboSala = a.fkRobo
+        JOIN 
+            cirurgia c ON a.dtHora BETWEEN c.dataInicio AND TIMESTAMPADD(MINUTE, c.duracao, c.dataInicio)
+		JOIN 
+			RoboCirurgiao r ON r.fkHospital = 1
+        JOIN 
+            categoriaCirurgia cr ON c.fkCategoria = cr.idCategoria;
+            
+            WITH AlertasNumerados AS (
+    SELECT 
+        a.tipo_alerta,
+        a.dado,
+        a.fkRobo,
+        DATE_FORMAT(a.dtHora, '%d/%m/%Y %H:%i:%s') as dtHoraComponente,
+        a.nome_componente,
+        cn.unidade,
+        s.numero,
+        DATE_FORMAT(c.dataInicio, '%d/%m/%Y %H:%i:%s') as dtHoraCirurgia,
+        DATE_FORMAT(TIMESTAMPADD(MINUTE, c.duracao, c.dataInicio), '%d/%m/%Y %H:%i:%s') as dtHoraFimCirurgia,
+        c.duracao,
+        c.nomePaciente,
+        c.nomeMedico,
+        c.tipo,
+        cr.niveisPericuloridade as risco,
+        ROW_NUMBER() OVER (PARTITION BY a.nome_componente ORDER BY a.dado DESC) AS numAlerta
+    FROM 
+        alerta a
+    JOIN 
+        salaCirurgiao s ON s.fkRoboSala = a.fkRobo
+    JOIN 
+        cirurgia c ON a.dtHora BETWEEN c.dataInicio AND TIMESTAMPADD(MINUTE, c.duracao, c.dataInicio)
+    JOIN 
+        RoboCirurgiao r ON r.fkHospital = 1
+    JOIN 
+        categoriaCirurgia cr ON c.fkCategoria = cr.idCategoria
+	JOIN 
+		componentes cn ON a.nome_componente = cn.nome
+        WHERE a.nome_componente = "Velocidade da CPU"
+)
+SELECT 
+    tipo_alerta,
+    dado,
+    fkRobo,
+    dtHoraComponente,
+    nome_componente,
+    unidade,
+    numero,
+    dtHoraCirurgia,
+    dtHoraFimCirurgia,
+    duracao,
+    nomePaciente,
+    nomeMedico,
+    tipo,
+    risco
+FROM 
+    AlertasNumerados
+WHERE 
+    numAlerta <= 7
+    ORDER BY dtHoraComponente;
+
+
+WITH LinhasComponentes AS (
+        SELECT
+          r.idRegistro,
+          DATE_FORMAT(r.HorarioDado, '%H:%i:%s') AS HorarioFormatado,
+          r.dado,
+          c.nome AS nomeComponente,
+          ROW_NUMBER() OVER (PARTITION BY c.nome ORDER BY r.dado DESC) AS linha_num
+        FROM Registros r
+        JOIN componentes c ON r.fkComponente = c.idComponentes
+        JOIN cirurgia cr ON cr.fkRoboCirurgia = r.fkRoboRegistro
+        WHERE r.fkRoboRegistro = 1
+        AND c.nome = 'Velocidade da CPU'
+        AND HorarioDado BETWEEN cr.dataInicio AND TIMESTAMPADD(MINUTE, cr.duracao, cr.dataInicio)
+      )
+      SELECT
+        idRegistro,
+        HorarioFormatado,
+        dado,
+        nomeComponente
+      FROM LinhasComponentes WHERE linha_num <= 7;
+      ORDER BY HorarioFormatado;
+      
+      SELECT * FROM componentes;
