@@ -161,25 +161,25 @@
 	-- Inserir Métricas de CPU
 	INSERT INTO Metrica (idMetrica, alerta, urgente, critico, tipo_dado)
 	VALUES
-	(1, 60, 70, 80, 'Porcentagem de Uso'),
-	(3, 264, 275, 300, 'Processos'),
-    (11, 0.4, 0.3, 0.2, 'Velocidade');
-
+	(1, 60, 70, 80, 'Porcentagem da CPU'),
+	(3, 264, 275, 300, 'Processos da CPU'),
+    (11, 0.4, 0.3, 0.2, 'Velocidade da CPU');
+	
 	-- Inserir Métricas de RAM
 	INSERT INTO Metrica (idMetrica, alerta, urgente, critico, tipo_dado)
 	VALUES
-	(5, 90.1, 93, 95, 'Porcentagem de Uso'),
-	(6, 17, 18, 20, 'Porcentagem da memoria Swap');
+	(5, 90.1, 93, 95, 'Porcentagem da Memoria'),
+	(6, 17, 18, 20, 'Porcentagem da Memoria Swap');
 
 	-- Inserir Métricas de Disco Rígido
 	INSERT INTO Metrica (idMetrica, alerta, urgente, critico, tipo_dado)
 	VALUES
-	(8, 70, 80, 90, 'Porcentagem de Uso');
+	(8, 70, 80, 90, 'Porcentagem do Disco');
 
 	-- Inserir Métricas de Rede
 	INSERT INTO Metrica (idMetrica, alerta, urgente, critico, tipo_dado)
 	VALUES
-	(10, 40, 60, 80, 'Latência de Rede');
+	(10, 40, 60, 80, 'Latencia de Rede');
 
 	-- Crie a tabela categoriaComponente
 	CREATE TABLE IF NOT EXISTS categoriaComponente (
@@ -241,10 +241,10 @@
 	INSERT INTO componentes (nome, unidade, descricaoAdd, fkCategoriaComponente, fkMetrica) 
 	VALUES ('Status da Rede', null, 'Conexao da Rede', 4, null),
 	("Latencia de Rede", 'ms','Latencia em MS', 4, 10),
-	('Bytes enviados','Bytes enviados da Rede', 4, null),
-	('Bytes recebidos','Bytes recebidos da Rede', 4, null);
+	('Bytes enviados','Bytes','Bytes enviados da Rede', 4, null),
+	('Bytes recebidos','Bytes','Bytes recebidos da Rede', 4, null);
     
-    INSERT INTO componentes (nome, unidade, descricaoAdd, fkCategoriaComponente, fkMetrica) 
+    INSERT INTO componentes (nome, descricaoAdd, fkCategoriaComponente, fkMetrica) 
 	VALUES ('Quantidade de processos', 'Quantidades de processos em execução', 5, null);
 
 	CREATE TABLE dispositivos_usb (
@@ -394,3 +394,4 @@
 	-- Mostrar as tabelas do banco de dados
 	SHOW TABLES;
     
+    SELECT * FROM metrica;
